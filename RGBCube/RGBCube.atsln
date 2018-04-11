@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "RGBCube", "RGBCube.cproj", "{3778977E-742B-4EAA-AAD7-CEA762B8C178}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3778977E-742B-4EAA-AAD7-CEA762B8C178}.Debug|AVR.ActiveCfg = Debug|AVR
+		{3778977E-742B-4EAA-AAD7-CEA762B8C178}.Debug|AVR.Build.0 = Debug|AVR
+		{3778977E-742B-4EAA-AAD7-CEA762B8C178}.Release|AVR.ActiveCfg = Release|AVR
+		{3778977E-742B-4EAA-AAD7-CEA762B8C178}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

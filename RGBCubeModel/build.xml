@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<project name="RGB-Cube" default="buildAll">
+	<property name="src.dir" value="src" />
+	<property name="build.dir" value="build/classes" />
+	<property name="dest.dir" value="dest" />
+	<property name="lib.dir" value="libs" />
+	<property name="javadoc.dir" value="gen-doc" />
+	<property name="sound.dir" value="sounds" />
+	<property name="androidLib.dir" value="../RGBCubeControl/libs" />
+	<property name="androidSounds.dir" value="../RGBCubeControl/app/src/main/res/raw" />
+
+	<path id="master-classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement path="${build.dir}" />
+	</path>
+
+	<target name="print-version">
+		<echo>Java/JVM version: ${ant.java.version}</echo>
+	</target>
+
+	<target name="build" description="Compile source tree java files">
+		<mkdir dir="${build.dir}" />
+		<javac destdir="${build.dir}">
+			<src path="${src.dir}" />
+			<classpath refid="master-classpath" />
+		</javac>
+
+		<jar destfile="${dest.dir}/shared.jar" basedir="${build.dir}" includes="de/jonas/cubeModel/animations/** de/jonas/cubeModel/scheduling/** de/jonas/cubeModel/Cube.class de/jonas/cubeModel/Constants.class de/jonas/cubeModel/mediaPlayback/AudioPlayer.class" excludes="**/Test.class" />
+		<jar destfile="${dest.dir}/cube.jar" basedir="${build.dir}" includes="de/jonas/cubeModel/**" excludes="**/Test.class">
+			<manifest>
+				<attribute name="Main-Class" value="de.jonas.cubeModel.Main" />
+			</manifest>
+		</jar>
+	</target>
+
+
+	<target name="clean" description="Clean output directories">
+		<echo>Cleaning "${build.dir}", "${dest.dir}" and "${javadoc.dir}"</echo>
+		<delete failonerror="false">
+			<fileset dir="${build.dir}">
+				<include name="**/**" />
+			</fileset>
+			<fileset dir="${dest.dir}">
+				<include name="**" />
+			</fileset>
+			<fileset dir="${javadoc.dir}.dir}">
+				<include name="**" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="generate-javadoc">
+		<javadoc packagenames="de.jonas.cubeModel.animations.*, de.jonas.cubeModel.scheduling.*, de.jonas.mediaPlayBack.AudioPlayer" sourcepath="${src.dir}" destdir="${javadoc.dir}" version="true" windowtitle="RGB-Cube-Model">
+		</javadoc>
+		<echo message="java doc has been generated!" />
+	</target>
+
+	<target depends="generate-javadoc" description="build javadoc jar" name="package-docs">
+		<jar compress="true" destfile="${dest.dir}/javadoc.jar" basedir="${javadoc.dir}" />
+	</target>
+
+	<target name="copyFiles" description="Copy shared files to Android lib">
+		<copy file="${dest.dir}/shared.jar" todir="${androidLib.dir}" />
+		<copy file="${dest.dir}/javadoc.jar" todir="${androidLib.dir}" />
+		<copy todir="${androidSounds.dir}">
+			<fileset dir="${sound.dir}" includes="**/*.mp3" />
+		</copy>
+	</target>
+
+	<target name="buildAll" description="Clean, compile and pack" depends="print-version, clean, build, package-docs, copyFiles" />
+
+
+</project>
