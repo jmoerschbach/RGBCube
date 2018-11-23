@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">RGBCubeControl</string>
+    <string name="sendButton">Send</string>
+    <string name="service_description">Streaming data to RGBCube while playing music</string>
 </resources>
