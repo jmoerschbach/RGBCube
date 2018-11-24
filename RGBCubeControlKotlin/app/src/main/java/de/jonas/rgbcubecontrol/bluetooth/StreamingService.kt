@@ -12,15 +12,8 @@ import app.akexorcist.bluetotohspp.library.BluetoothSPP.BluetoothConnectionListe
 class StreamingService() : IntentService("StreamingService") {
 
     override fun onHandleIntent(p0: Intent?) {
-        Log.w("StreamingService", "onHandleIntent")
-
         Log.w("StreamingService", "going to send because connection sucessful")
-//        bt.send("Hallo", true)
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        Log.w("StreamingService", "onCreate")
-
+        for (i in 0..10)
+            App.bt.send("Hallo", true)
     }
 }
