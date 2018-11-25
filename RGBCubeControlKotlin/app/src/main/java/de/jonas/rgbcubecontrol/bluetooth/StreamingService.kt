@@ -11,9 +11,20 @@ import app.akexorcist.bluetotohspp.library.BluetoothSPP.BluetoothConnectionListe
 
 class StreamingService() : IntentService("StreamingService") {
 
+    private var shouldRun = true
+
     override fun onHandleIntent(p0: Intent?) {
         Log.w("StreamingService", "going to send because connection sucessful")
-        for (i in 0..10)
+        shouldRun=true
+        while(shouldRun)
             App.bt.send("Hallo", true)
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        shouldRun=false
+        Log.w("StreamingService", "going to be destroyed")
+
+    }
+
 }
