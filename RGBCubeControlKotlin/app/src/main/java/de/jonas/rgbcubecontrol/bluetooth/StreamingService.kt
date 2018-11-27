@@ -2,6 +2,7 @@ package de.jonas.rgbcubecontrol.bluetooth
 
 import android.app.IntentService
 import android.content.Intent
+import android.os.IBinder
 import android.util.Log
 import app.akexorcist.bluetotohspp.library.BluetoothSPP
 import app.akexorcist.bluetotohspp.library.BluetoothState
@@ -25,6 +26,10 @@ class StreamingService() : IntentService("StreamingService") {
         shouldRun=false
         Log.w("StreamingService", "going to be destroyed")
 
+    }
+
+    override fun onBind(intent: Intent?): IBinder {
+        return super.onBind(intent)
     }
 
 }

@@ -13,18 +13,26 @@ import android.widget.Button
 import de.jonas.rgbcubecontrol.bluetooth.StreamingService
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.support.v7.widget.Toolbar
+import android.widget.ImageView
 import app.akexorcist.bluetotohspp.library.DeviceList
 import de.jonas.rgbcubecontrol.ui.App.Companion.bt
+import org.jetbrains.anko.find
 
 
 class MainActivity() : AppCompatActivity() {
 
+    val toolbar by lazy { find<Toolbar>(R.id.toolbar) }
+    val connectionStatusIcon by lazy { find<ImageView>(R.id.connectionStatus) }
+    val stopButton by lazy { find<Button>(R.id.stopButton) }
+    val sendButton by lazy { find<Button>(R.id.sendButton) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
 
-
-        setupBluetooth()
+        connectionStatusIcon.setOnClickListener { setupBluetooth() }
     }
 
     private fun setupBluetooth() {
@@ -45,36 +53,38 @@ class MainActivity() : AppCompatActivity() {
         startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE)
     }
 
-    private fun setupConnection() {
+    private fun setupConnection(data: Intent) {
         bt.setupService()
         bt.startService(BluetoothState.DEVICE_OTHER)
         bt.setBluetoothConnectionListener(object : BluetoothSPP.BluetoothConnectionListener {
             override fun onDeviceConnected(name: String, address: String) {
                 Toast.makeText(App.instance, "enabling button", Toast.LENGTH_SHORT).show()
                 Log.w("StreamingService", "succesfull connected to {$name}")
-                findViewById<Button>(R.id.sendButton).isEnabled = true
-                findViewById<Button>(R.id.stopButton).isEnabled = true
+                sendButton.isEnabled = true
+                stopButton.isEnabled = true
+                connectionStatusIcon.setImageResource(R.drawable.connect)
             }
 
             override fun onDeviceDisconnected() {
-                findViewById<Button>(R.id.stopButton).isEnabled = false
-                findViewById<Button>(R.id.sendButton).isEnabled = false
+                stopButton.isEnabled = false
+                sendButton.isEnabled = false
+                connectionStatusIcon.setImageResource(R.drawable.disconnect)
             }
 
             override fun onDeviceConnectionFailed() {
-                findViewById<Button>(R.id.stopButton).isEnabled = false
-                findViewById<Button>(R.id.sendButton).isEnabled = false
+                stopButton.isEnabled = false
+                sendButton.isEnabled = false
+                connectionStatusIcon.setImageResource(R.drawable.disconnect)
             }
         })
+        bt.connect(data)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
             if (resultCode == Activity.RESULT_OK) {
-                setupConnection()
-                bt.connect(data!!)
-            }
-            else {
+                setupConnection(data!!)
+            } else {
                 Toast.makeText(this, "you need to choose a RGB-Cube", Toast.LENGTH_SHORT).show()
             }
         } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
@@ -88,9 +98,21 @@ class MainActivity() : AppCompatActivity() {
 
     fun send(view: View) {
 
+//        val pendingIntent: PendingIntent =
+//                Intent(this, StreamingService::class.java).let { notificationIntent ->
+//                    PendingIntent.getActivity(this, 0, notificationIntent, 0)
+//                }
+//
+//        val notification: Notification = Notification.Builder(this, Notification.CATEGORY_EVENT)
+//                .setContentTitle("RGBCube")
+//                .setContentText("streaming data to cube")
+//                .setContentIntent(pendingIntent)
+//                .setTicker("bla")
+//                .build()
+//
+//        startForegroundService(1, notification)
         Intent(this, StreamingService::class.java).also { intent ->
-
-            startService(intent)
+            startForegroundService(intent)
         }
         Toast.makeText(this, "start sending...", Toast.LENGTH_SHORT).show()
 
