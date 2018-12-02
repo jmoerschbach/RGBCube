@@ -12,6 +12,8 @@ import android.content.Intent
 import android.widget.Button
 import de.jonas.rgbcubecontrol.bluetooth.StreamingService
 import android.app.Activity
+import android.app.Notification
+import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
 import android.support.v7.widget.Toolbar
 import android.widget.ImageView
@@ -59,7 +61,7 @@ class MainActivity() : AppCompatActivity() {
         bt.setBluetoothConnectionListener(object : BluetoothSPP.BluetoothConnectionListener {
             override fun onDeviceConnected(name: String, address: String) {
                 Toast.makeText(App.instance, "enabling button", Toast.LENGTH_SHORT).show()
-                Log.w("StreamingService", "succesfull connected to {$name}")
+                Log.w("StreamingService", "successfull connected to {$name}")
                 sendButton.isEnabled = true
                 stopButton.isEnabled = true
                 connectionStatusIcon.setImageResource(R.drawable.connect)
@@ -110,7 +112,7 @@ class MainActivity() : AppCompatActivity() {
 //                .setTicker("bla")
 //                .build()
 //
-//        startForegroundService(1, notification)
+//        startForeground(1, notification)
         Intent(this, StreamingService::class.java).also { intent ->
             startForegroundService(intent)
         }
