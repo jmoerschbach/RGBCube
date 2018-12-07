@@ -20,14 +20,17 @@ import android.widget.ImageView
 import app.akexorcist.bluetotohspp.library.DeviceList
 import de.jonas.rgbcubecontrol.ui.App.Companion.bt
 import org.jetbrains.anko.find
+import kotlin.properties.Delegates
 
 
 class MainActivity() : AppCompatActivity() {
+    private val TAG = "MainActivity"
+    var connectedToCube by Delegates.observable(false) { _, _, isConnected -> connectionStatus(isConnected) }
 
-    val toolbar by lazy { find<Toolbar>(R.id.toolbar) }
-    val connectionStatusIcon by lazy { find<ImageView>(R.id.connectionStatus) }
-    val stopButton by lazy { find<Button>(R.id.stopButton) }
-    val sendButton by lazy { find<Button>(R.id.sendButton) }
+    private val toolbar by lazy { find<Toolbar>(R.id.toolbar) }
+    private val connectionStatusIcon by lazy { find<ImageView>(R.id.connectionStatus) }
+    private val stopButton by lazy { find<Button>(R.id.stopButton) }
+    private val sendButton by lazy { find<Button>(R.id.sendButton) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,11 +38,14 @@ class MainActivity() : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         connectionStatusIcon.setOnClickListener { setupBluetooth() }
+        connectedToCube = bt.connectedDeviceName != null
+
+        Log.w(TAG, "onCreate: connected to cube: $connectedToCube")
     }
 
     private fun setupBluetooth() {
         if (bt.isBluetoothEnabled) {
-            chooseBluetoothDevice()
+            if (!connectedToCube) chooseBluetoothDevice() else disconnect()
         } else {
             enableBluetooth()
         }
@@ -55,31 +61,40 @@ class MainActivity() : AppCompatActivity() {
         startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE)
     }
 
+    private fun disconnect() = bt.disconnect()
+
     private fun setupConnection(data: Intent) {
         bt.setupService()
         bt.startService(BluetoothState.DEVICE_OTHER)
         bt.setBluetoothConnectionListener(object : BluetoothSPP.BluetoothConnectionListener {
             override fun onDeviceConnected(name: String, address: String) {
-                Toast.makeText(App.instance, "enabling button", Toast.LENGTH_SHORT).show()
-                Log.w("StreamingService", "successfull connected to {$name}")
-                sendButton.isEnabled = true
-                stopButton.isEnabled = true
-                connectionStatusIcon.setImageResource(R.drawable.connect)
+                Toast.makeText(App.instance, "successful connected to $name", Toast.LENGTH_SHORT).show()
+                Log.w("StreamingService", "successful connected to $name")
+                connectedToCube = true
             }
 
             override fun onDeviceDisconnected() {
-                stopButton.isEnabled = false
-                sendButton.isEnabled = false
-                connectionStatusIcon.setImageResource(R.drawable.disconnect)
+                Toast.makeText(App.instance, "disconnected", Toast.LENGTH_SHORT).show()
+                connectedToCube = false
             }
 
             override fun onDeviceConnectionFailed() {
-                stopButton.isEnabled = false
-                sendButton.isEnabled = false
-                connectionStatusIcon.setImageResource(R.drawable.disconnect)
+                Toast.makeText(App.instance, "connection attempt failed", Toast.LENGTH_SHORT).show()
+                connectedToCube = false
             }
         })
         bt.connect(data)
+    }
+
+    private fun connectionStatus(isConnected: Boolean) {
+        sendButton.isEnabled = isConnected
+        stopButton.isEnabled = isConnected
+        if (isConnected)
+            connectionStatusIcon.setImageResource(R.drawable.connect)
+        else {
+            stopStreamingService()
+            connectionStatusIcon.setImageResource(R.drawable.disconnect)
+        }
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -99,35 +114,23 @@ class MainActivity() : AppCompatActivity() {
     }
 
     fun send(view: View) {
-
-//        val pendingIntent: PendingIntent =
-//                Intent(this, StreamingService::class.java).let { notificationIntent ->
-//                    PendingIntent.getActivity(this, 0, notificationIntent, 0)
-//                }
-//
-//        val notification: Notification = Notification.Builder(this, Notification.CATEGORY_EVENT)
-//                .setContentTitle("RGBCube")
-//                .setContentText("streaming data to cube")
-//                .setContentIntent(pendingIntent)
-//                .setTicker("bla")
-//                .build()
-//
-//        startForeground(1, notification)
-        Intent(this, StreamingService::class.java).also { intent ->
-            startForegroundService(intent)
-        }
         Toast.makeText(this, "start sending...", Toast.LENGTH_SHORT).show()
+        startStreamingService()
 
     }
 
+    private fun startStreamingService() {
+        Intent(this, StreamingService::class.java).also { startForegroundService(it) }
+    }
+
     fun stop(view: View) {
-
-        Intent(this, StreamingService::class.java).also { intent ->
-
-            stopService(intent)
-        }
         Toast.makeText(this, "stop sending...", Toast.LENGTH_SHORT).show()
+        stopStreamingService()
 
+    }
+
+    private fun stopStreamingService() {
+        Intent(this, StreamingService::class.java).also { stopService(it) }
     }
 
 }

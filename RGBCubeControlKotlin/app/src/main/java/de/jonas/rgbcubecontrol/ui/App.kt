@@ -1,6 +1,9 @@
 package de.jonas.rgbcubecontrol.ui
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import app.akexorcist.bluetotohspp.library.BluetoothSPP
 import jonas.de.weatherapp.ui.utils.DelegatesExt
 import jonas.de.weatherapp.ui.utils.NotNullSingleValueVar
@@ -10,6 +13,7 @@ class App : Application() {
     companion object {
         var instance: App by DelegatesExt.notNullSingleValue()
         var bt: BluetoothSPP by DelegatesExt.notNullSingleValue()
+        const val channel_id : String = "my_channel_01"
         fun instance() = instance
         fun bt() = bt
     }
@@ -18,5 +22,15 @@ class App : Application() {
         super.onCreate()
         instance = this
         bt = BluetoothSPP(this)
+        createNotificationChannel()
+    }
+
+    private fun createNotificationChannel() {
+
+        val channel = NotificationChannel(channel_id,
+                "Channel human readable title",
+                NotificationManager.IMPORTANCE_DEFAULT)
+
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
     }
 }
