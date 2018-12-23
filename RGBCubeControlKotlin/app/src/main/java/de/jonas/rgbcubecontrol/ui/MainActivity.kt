@@ -9,28 +9,44 @@ import app.akexorcist.bluetotohspp.library.BluetoothSPP
 import app.akexorcist.bluetotohspp.library.BluetoothState
 import de.jonas.rgbcubecontrol.R
 import android.content.Intent
-import android.widget.Button
 import de.jonas.rgbcubecontrol.bluetooth.StreamingService
 import android.app.Activity
-import android.app.Notification
-import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
-import android.support.v7.widget.Toolbar
-import android.widget.ImageView
+import android.content.ComponentName
+import android.content.Context
+import android.content.ServiceConnection
+import android.os.IBinder
 import app.akexorcist.bluetotohspp.library.DeviceList
 import de.jonas.rgbcubecontrol.ui.App.Companion.bt
-import org.jetbrains.anko.find
 import kotlin.properties.Delegates
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity() : AppCompatActivity() {
     private val TAG = "MainActivity"
+
+    private lateinit var mService: StreamingService
+    private var mBound: Boolean = false
+
+
     var connectedToCube by Delegates.observable(false) { _, _, isConnected -> connectionStatus(isConnected) }
 
-    private val toolbar by lazy { find<Toolbar>(R.id.toolbar) }
-    private val connectionStatusIcon by lazy { find<ImageView>(R.id.connectionStatus) }
-    private val stopButton by lazy { find<Button>(R.id.stopButton) }
-    private val sendButton by lazy { find<Button>(R.id.sendButton) }
+
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val mConnection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as StreamingService.LocalBinder
+            mService = binder.getService()
+            mBound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +55,22 @@ class MainActivity() : AppCompatActivity() {
 
         connectionStatusIcon.setOnClickListener { setupBluetooth() }
         connectedToCube = bt.connectedDeviceName != null
-
+//android:configChanges="orientation|screenSize"
         Log.w(TAG, "onCreate: connected to cube: $connectedToCube")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Bind to LocalService
+
+    }
+
+
+    override fun onResume() {
+        Log.w(TAG, "onResume")
+        super.onResume()
+        connectedToCube = bt.connectedDeviceName != null;
+        Log.w(TAG, "onResume: connected to cube: $connectedToCube")
     }
 
     private fun setupBluetooth() {
@@ -69,7 +99,7 @@ class MainActivity() : AppCompatActivity() {
         bt.setBluetoothConnectionListener(object : BluetoothSPP.BluetoothConnectionListener {
             override fun onDeviceConnected(name: String, address: String) {
                 Toast.makeText(App.instance, "successful connected to $name", Toast.LENGTH_SHORT).show()
-                Log.w("StreamingService", "successful connected to $name")
+                Log.w(TAG, "successful connected to $name")
                 connectedToCube = true
             }
 
@@ -87,13 +117,14 @@ class MainActivity() : AppCompatActivity() {
     }
 
     private fun connectionStatus(isConnected: Boolean) {
+        Log.w(TAG, "connectionStatus= $isConnected")
         sendButton.isEnabled = isConnected
         stopButton.isEnabled = isConnected
         if (isConnected)
             connectionStatusIcon.setImageResource(R.drawable.connect)
         else {
-            stopStreamingService()
             connectionStatusIcon.setImageResource(R.drawable.disconnect)
+            stopStreamingService()
         }
     }
 
@@ -120,7 +151,12 @@ class MainActivity() : AppCompatActivity() {
     }
 
     private fun startStreamingService() {
-        Intent(this, StreamingService::class.java).also { startForegroundService(it) }
+        Intent(this, StreamingService::class.java).also { intent ->
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
+        }
+        if(mBound)
+            mService.startPlaying()
+        //Intent(this, StreamingService::class.java).also { startForegroundService(it) }
     }
 
     fun stop(view: View) {
@@ -130,7 +166,9 @@ class MainActivity() : AppCompatActivity() {
     }
 
     private fun stopStreamingService() {
-        Intent(this, StreamingService::class.java).also { stopService(it) }
+        if (mBound)
+            mService.stopPlaying()
+        //  Intent(this, StreamingService::class.java).also { stopService(it) }
     }
 
 }

@@ -11,16 +11,24 @@ import app.akexorcist.bluetotohspp.library.BluetoothSPP.BluetoothConnectionListe
 import android.support.v4.app.NotificationCompat
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Context
+import android.os.Binder
 import android.os.Build
 import android.support.v4.app.NotificationCompat.PRIORITY_MIN
 import de.jonas.rgbcubecontrol.R
+import de.jonas.rgbcubecontrol.domain.animations.Animation
+import de.jonas.rgbcubecontrol.domain.animations.SimpleMultiplexAnimation
 import de.jonas.rgbcubecontrol.ui.MainActivity
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
-class StreamingService() : IntentService("StreamingService") {
+class StreamingService() : Service() {
 
-    private var shouldRun = true
+
+    // Binder given to clients
+    private val mBinder = LocalBinder()
     private val TAG = "StreamingService"
+    private var scheduler = Executors.newScheduledThreadPool(1)
 
 
     override fun onCreate() {
@@ -48,22 +56,38 @@ class StreamingService() : IntentService("StreamingService") {
 
 
 
-    override fun onHandleIntent(p0: Intent?) {
-        Log.w(TAG, "going to send because connection successful")
-        shouldRun = true
-        while (shouldRun)
-            App.bt.send("Hallo", true)
+
+
+    fun startPlaying() {
+        Log.w(TAG, "startPlaying")
+        val start = ByteArray(1).also { it[0] = 'a'.toByte() }
+        val end = ByteArray(1).also { it[0] = 'e'.toByte() }
+
+        val animationToRun = SimpleMultiplexAnimation()
+
+        scheduler.scheduleAtFixedRate({
+            animationToRun.animate1ms()//
+            App.bt.send(start, false)//
+            App.bt.send(animationToRun.byteStream, false) //
+            App.bt.send(end, false)
+        }, 0, 1, TimeUnit.MICROSECONDS)
+
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        shouldRun = false
-        Log.w(TAG, "going to be destroyed")
-
+    fun stopPlaying() {
+        Log.w(TAG, "stopPlaying")
+        scheduler.shutdownNow()
+        scheduler=Executors.newScheduledThreadPool(1)
     }
+
+    inner class LocalBinder : Binder() {
+        // Return this instance of LocalService so clients can call public methods
+        fun getService(): StreamingService = this@StreamingService
+    }
+
 
     override fun onBind(intent: Intent?): IBinder {
-        return super.onBind(intent)
+        Log.w(TAG, "onBind")
+        return mBinder
     }
-
 }

@@ -13,7 +13,7 @@ class App : Application() {
     companion object {
         var instance: App by DelegatesExt.notNullSingleValue()
         var bt: BluetoothSPP by DelegatesExt.notNullSingleValue()
-        const val channel_id : String = "my_channel_01"
+        const val channel_id : String = "RGBCubeControl Notfication Channel"
         fun instance() = instance
         fun bt() = bt
     }
@@ -28,8 +28,9 @@ class App : Application() {
     private fun createNotificationChannel() {
 
         val channel = NotificationChannel(channel_id,
-                "Channel human readable title",
-                NotificationManager.IMPORTANCE_DEFAULT)
+                "RGBCubeControl Notfication Channel",
+                NotificationManager.IMPORTANCE_LOW)
+        channel.enableVibration(false)
 
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
     }

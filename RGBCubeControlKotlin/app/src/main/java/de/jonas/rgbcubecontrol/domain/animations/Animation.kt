@@ -30,15 +30,14 @@ import kotlin.experimental.or
  *
  * @author Jonas
  */
-abstract class Animation() : Observer, Runnable {
+abstract class Animation() : Observer {
 
-    @Volatile
-    @get:Synchronized
+
     var byteStream: ByteArray
         protected set
 
     protected var rand: Random
-//    private val allCubes: MutableList<Cube>
+    //    private val allCubes: MutableList<Cube>
     protected var milliSecondsToRun: Long = 0
 
     var isRunning: Boolean = false
@@ -91,26 +90,27 @@ abstract class Animation() : Observer, Runnable {
             setBit(0, layerNr)
     }
 
-    override fun run() {
-        isRunning = true
-        while (shouldRun()) {
-            loop()
-            delay(1)
-        }
-        isRunning = false
-    }
-
-    internal abstract fun loop()
-
-    internal fun delay(ms: Int) {
-        try {
-            Thread.sleep(ms.toLong())
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
+    /*
+        override fun run() {
+            isRunning = true
+            while (shouldRun()) {
+                loop()
+                delay(1)
+            }
+            isRunning = false
         }
 
-    }
+        internal abstract fun loop()
 
+        internal fun delay(ms: Int) {
+            try {
+                Thread.sleep(ms.toLong())
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+
+        }
+    */
     internal fun turnAllLayersOn() {
         for (i in 0 until Constants.numberOfLedsInColumn)
             turnLayerOn(i)
@@ -338,53 +338,53 @@ abstract class Animation() : Observer, Runnable {
      * gets executed every 1ms. Use this for multiplexing!
      */
 
-    fun animate1ms() {}
+    open fun animate1ms() {}
 
     /**
      * gets executed every 2ms. Use this for multiplexing!
      */
 
-    fun animate2ms() {}
+    open fun animate2ms() {}
 
     /**
      * gets executed every 5ms.
      */
-    fun animate5ms() {}
+    open fun animate5ms() {}
 
     /**
      * gets executed every 10ms
      */
-    fun animate10ms() {}
+    open fun animate10ms() {}
 
     /**
      * gets executed every 25ms
      */
-    fun animate25ms() {}
+    open fun animate25ms() {}
 
     /**
      * gets executed every 50ms
      */
-    fun animate50ms() {}
+    open fun animate50ms() {}
 
     /**
      * gets executed every 100ms
      */
-    fun animate100ms() {}
+    open fun animate100ms() {}
 
     /**
      * gets executed every 200ms
      */
-    fun animate200ms() {}
+    open fun animate200ms() {}
 
     /**
      * gets executed every 500ms
      */
-    fun animate500ms() {}
+    open fun animate500ms() {}
 
     /**
      * gets executed every 1000ms
      */
-    fun animate1000ms() {}
+    open fun animate1000ms() {}
 
     override fun toString(): String {
         return animationName
