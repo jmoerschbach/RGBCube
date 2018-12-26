@@ -62,7 +62,15 @@ class MainActivity() : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         // Bind to LocalService
+        Intent(this, StreamingService::class.java).also {
+            startService(it)
+            bindService(it, mConnection, Context.BIND_AUTO_CREATE)
+        }
+    }
 
+    override fun onStop() {
+        super.onStop()
+        unbindService(mConnection)
     }
 
 
@@ -124,7 +132,7 @@ class MainActivity() : AppCompatActivity() {
             connectionStatusIcon.setImageResource(R.drawable.connect)
         else {
             connectionStatusIcon.setImageResource(R.drawable.disconnect)
-            stopStreamingService()
+            stopPlaying()
         }
     }
 
@@ -146,29 +154,23 @@ class MainActivity() : AppCompatActivity() {
 
     fun send(view: View) {
         Toast.makeText(this, "start sending...", Toast.LENGTH_SHORT).show()
-        startStreamingService()
+        startPlaying()
 
     }
 
-    private fun startStreamingService() {
-        Intent(this, StreamingService::class.java).also { intent ->
-            bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
-        }
-        if(mBound)
+    private fun startPlaying() {
+        if (mBound)
             mService.startPlaying()
-        //Intent(this, StreamingService::class.java).also { startForegroundService(it) }
     }
 
     fun stop(view: View) {
         Toast.makeText(this, "stop sending...", Toast.LENGTH_SHORT).show()
-        stopStreamingService()
-
+        stopPlaying()
     }
 
-    private fun stopStreamingService() {
+    private fun stopPlaying(){
         if (mBound)
             mService.stopPlaying()
-        //  Intent(this, StreamingService::class.java).also { stopService(it) }
     }
 
 }
