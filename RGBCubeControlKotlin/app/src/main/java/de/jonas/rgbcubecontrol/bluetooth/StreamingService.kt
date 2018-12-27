@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.app.ServiceCompat
 import de.jonas.rgbcubecontrol.R
 import de.jonas.rgbcubecontrol.domain.animations.SimpleMultiplexAnimation
+import de.jonas.rgbcubecontrol.domain.animations.TestLedAnimation
 import de.jonas.rgbcubecontrol.ui.MainActivity
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -61,7 +62,7 @@ class StreamingService() : Service() {
 
     fun startPlaying() {
         Log.w(TAG, "startPlaying")
-        val animationToRun = SimpleMultiplexAnimation()
+        val animationToRun = TestLedAnimation()
 
         startAsForegroundService(buildNotification("Currently playing ${animationToRun.animationName}..."))
 
@@ -76,11 +77,11 @@ class StreamingService() : Service() {
             App.bt.send(end, false)
         }, 0, 1, TimeUnit.MILLISECONDS)
 
-        scheduler.scheduleAtFixedRate({ animationToRun.animate2ms() }, 0, 2, TimeUnit.MILLISECONDS)
-        scheduler.scheduleAtFixedRate({ animationToRun.animate5ms() }, 0, 5, TimeUnit.MILLISECONDS)
-        scheduler.scheduleAtFixedRate({ animationToRun.animate10ms() }, 0, 10, TimeUnit.MILLISECONDS)
-        scheduler.scheduleAtFixedRate({ animationToRun.animate25ms() }, 0, 25, TimeUnit.MILLISECONDS)
-        scheduler.scheduleAtFixedRate({ animationToRun.animate50ms() }, 0, 50, TimeUnit.MILLISECONDS)
+//        scheduler.scheduleAtFixedRate({ animationToRun.animate2ms() }, 0, 2, TimeUnit.MILLISECONDS)
+//        scheduler.scheduleAtFixedRate({ animationToRun.animate5ms() }, 0, 5, TimeUnit.MILLISECONDS)
+//        scheduler.scheduleAtFixedRate({ animationToRun.animate10ms() }, 0, 10, TimeUnit.MILLISECONDS)
+//        scheduler.scheduleAtFixedRate({ animationToRun.animate25ms() }, 0, 25, TimeUnit.MILLISECONDS)
+//        scheduler.scheduleAtFixedRate({ animationToRun.animate50ms() }, 0, 50, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate100ms() }, 0, 100, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate200ms() }, 0, 200, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate500ms() }, 0, 500, TimeUnit.MILLISECONDS)
