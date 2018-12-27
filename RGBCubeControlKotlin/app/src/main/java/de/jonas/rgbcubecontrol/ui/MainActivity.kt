@@ -29,14 +29,14 @@ class MainActivity() : AppCompatActivity() {
     private var mBound: Boolean = false
 
 
-    var connectedToCube by Delegates.observable(false) { _, _, isConnected -> connectionStatus(isConnected) }
+    var connectedToCube by Delegates.observable(false) { _, wasConnected, isNowConnected ->
+        if (wasConnected != isNowConnected)
+            connectionStatus(isNowConnected)//
+    }
 
 
-    /** Defines callbacks for service binding, passed to bindService()  */
     private val mConnection = object : ServiceConnection {
-
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as StreamingService.LocalBinder
             mService = binder.getService()
             mBound = true
@@ -54,16 +54,11 @@ class MainActivity() : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         connectionStatusIcon.setOnClickListener { setupBluetooth() }
-        connectedToCube = bt.connectedDeviceName != null
-//android:configChanges="orientation|screenSize"
-        Log.w(TAG, "onCreate: connected to cube: $connectedToCube")
     }
 
     override fun onStart() {
         super.onStart()
-        // Bind to LocalService
         Intent(this, StreamingService::class.java).also {
-            startService(it)
             bindService(it, mConnection, Context.BIND_AUTO_CREATE)
         }
     }
@@ -125,7 +120,7 @@ class MainActivity() : AppCompatActivity() {
     }
 
     private fun connectionStatus(isConnected: Boolean) {
-        Log.w(TAG, "connectionStatus= $isConnected")
+        Log.w(TAG, "connectionStatus=$isConnected")
         sendButton.isEnabled = isConnected
         stopButton.isEnabled = isConnected
         if (isConnected)
@@ -159,6 +154,7 @@ class MainActivity() : AppCompatActivity() {
     }
 
     private fun startPlaying() {
+        Intent(this, StreamingService::class.java).also { startService(it) }
         if (mBound)
             mService.startPlaying()
     }
@@ -168,7 +164,7 @@ class MainActivity() : AppCompatActivity() {
         stopPlaying()
     }
 
-    private fun stopPlaying(){
+    private fun stopPlaying() {
         if (mBound)
             mService.stopPlaying()
     }

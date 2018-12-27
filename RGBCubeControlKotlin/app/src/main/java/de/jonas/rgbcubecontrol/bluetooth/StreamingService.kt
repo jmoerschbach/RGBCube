@@ -9,6 +9,7 @@ import android.support.v4.app.NotificationCompat
 import android.os.Binder
 import android.os.Build
 import android.support.v4.app.NotificationManagerCompat
+import android.support.v4.app.ServiceCompat
 import de.jonas.rgbcubecontrol.R
 import de.jonas.rgbcubecontrol.domain.animations.SimpleMultiplexAnimation
 import de.jonas.rgbcubecontrol.ui.MainActivity
@@ -30,18 +31,17 @@ class StreamingService() : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.w(TAG, "Number of cores: ${NUMBER_OF_CORES}")
-        startServiceOreoCondition()
+        Log.w(TAG, "Number of cores: $NUMBER_OF_CORES")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.w(TAG, "onStartCommand")
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun startServiceOreoCondition() {
+    private fun startAsForegroundService(notification: Notification) {
         if (Build.VERSION.SDK_INT >= 26) {
-
-            val notification = buildNotification()
+            Log.w(TAG, "startServiceOreoCondition")
             startForeground(NOTIFICATION_ID, notification)
         }
     }
@@ -61,16 +61,13 @@ class StreamingService() : Service() {
 
     fun startPlaying() {
         Log.w(TAG, "startPlaying")
+        val animationToRun = SimpleMultiplexAnimation()
+
+        startAsForegroundService(buildNotification("Currently playing ${animationToRun.animationName}..."))
 
 
         val start = ByteArray(1).also { it[0] = 'a'.toByte() }
         val end = ByteArray(1).also { it[0] = 'e'.toByte() }
-
-        val animationToRun = SimpleMultiplexAnimation()
-
-        val notification = buildNotification("Currently playing ${animationToRun.animationName}...")
-        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
-
 
         scheduler.scheduleAtFixedRate({
             animationToRun.animate1ms()//
@@ -92,8 +89,7 @@ class StreamingService() : Service() {
 
     fun stopPlaying() {
         Log.w(TAG, "stopPlaying")
-        val notification = buildNotification()
-        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
+        ServiceCompat.stopForeground(this, STOP_FOREGROUND_REMOVE)
         scheduler.shutdownNow()
         scheduler = Executors.newScheduledThreadPool(NUMBER_OF_CORES)
     }
