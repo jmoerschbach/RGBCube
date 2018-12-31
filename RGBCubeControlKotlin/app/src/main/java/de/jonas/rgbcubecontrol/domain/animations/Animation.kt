@@ -1,13 +1,8 @@
 package de.jonas.rgbcubecontrol.domain.animations
 
 
-import java.util.ArrayList
-import java.util.Observable
-import java.util.Observer
-import java.util.Random
-
-
 import de.jonas.rgbcubecontrol.domain.Constants
+import java.util.*
 import kotlin.experimental.and
 import kotlin.experimental.or
 
@@ -19,10 +14,7 @@ import kotlin.experimental.or
  *
  *
  * To create a new animation, simply extend this class and implement your
- * animating algorithm. An Animation runs infinitely per default. However, you
- * can (and you should) restrict the runtime of your animation by setting
- * [milliSecondsToRun] to an appropriate value in order to allow
- * subsequent animations to start.
+ * animating algorithm.
  *
  *
  * **Do not forget to add your animation's name to [.ANIMATIONS]
@@ -30,20 +22,14 @@ import kotlin.experimental.or
  *
  * @author Jonas
  */
-abstract class Animation() : Observer {
+abstract class Animation() {
 
 
     var byteStream: ByteArray
         protected set
 
     protected var rand: Random
-    //    private val allCubes: MutableList<Cube>
-    protected var milliSecondsToRun: Long = 0
 
-    var isRunning: Boolean = false
-        private set
-
-    private var clock: Int = 0
 
     /**
      *
@@ -60,16 +46,7 @@ abstract class Animation() : Observer {
     val audioFileName: String
         get() = ""
 
-    fun shouldRun(): Boolean {
-        return if (milliSecondsToRun == INFINITY.toLong()) true else milliSecondsToRun > 0
-    }
-
     init {
-        milliSecondsToRun = INFINITY.toLong()
-//        allCubes = ArrayList<Cube>()
-//        // for (Cube cur : cubes)
-//        allCubes.add(cubes)
-
         this.byteStream = ByteArray(25)
         this.rand = Random()
         clearAllLeds()
@@ -90,27 +67,6 @@ abstract class Animation() : Observer {
             setBit(0, layerNr)
     }
 
-    /*
-        override fun run() {
-            isRunning = true
-            while (shouldRun()) {
-                loop()
-                delay(1)
-            }
-            isRunning = false
-        }
-
-        internal abstract fun loop()
-
-        internal fun delay(ms: Int) {
-            try {
-                Thread.sleep(ms.toLong())
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-
-        }
-    */
     internal fun turnAllLayersOn() {
         for (i in 0 until Constants.numberOfLedsInColumn)
             turnLayerOn(i)
@@ -326,20 +282,6 @@ abstract class Animation() : Observer {
         byteStream[byteNr] = byteStream[byteNr] and (1 shl bitNr).inv().toByte()
     }
 
-    @Synchronized
-    fun sendToCube(interval: Int) {
-        // for (Cube cur : allCubes)
-        // cur.parse(byteStream);
-        if (milliSecondsToRun != INFINITY.toLong())
-            milliSecondsToRun -= interval.toLong()
-    }
-
-    /**
-     * gets executed every 1ms. Use this for multiplexing!
-     */
-
-    open fun animate1ms() {}
-
     /**
      * gets executed every 2ms. Use this for multiplexing!
      */
@@ -408,18 +350,9 @@ abstract class Animation() : Observer {
         return if (!animationName.equals(other!!.animationName, ignoreCase = true)) false else true
     }
 
-    override fun update(o: Observable, arg: Any) {
-
-    }
-
-    fun clockTick() {
-        this.clock -= 1
-
-    }
 
     companion object {
 
-        protected val INFINITY = -1
 
         /**
          * Register your animation by adding the class name to this array. Only then

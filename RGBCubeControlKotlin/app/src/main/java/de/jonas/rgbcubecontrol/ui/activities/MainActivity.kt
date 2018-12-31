@@ -1,25 +1,30 @@
-package de.jonas.rgbcubecontrol.ui
+package de.jonas.rgbcubecontrol.ui.activities
 
-import android.support.v7.app.AppCompatActivity
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import app.akexorcist.bluetotohspp.library.BluetoothSPP
 import app.akexorcist.bluetotohspp.library.BluetoothState
-import de.jonas.rgbcubecontrol.R
-import android.content.Intent
-import de.jonas.rgbcubecontrol.bluetooth.StreamingService
-import android.app.Activity
-import android.bluetooth.BluetoothAdapter
-import android.content.ComponentName
-import android.content.Context
-import android.content.ServiceConnection
-import android.os.IBinder
 import app.akexorcist.bluetotohspp.library.DeviceList
+import de.jonas.rgbcubecontrol.R
+import de.jonas.rgbcubecontrol.bluetooth.StreamingService
+import de.jonas.rgbcubecontrol.domain.animations.Animation
+import de.jonas.rgbcubecontrol.ui.AnimationItemProvider
+import de.jonas.rgbcubecontrol.ui.App
 import de.jonas.rgbcubecontrol.ui.App.Companion.bt
-import kotlin.properties.Delegates
+import de.jonas.rgbcubecontrol.ui.adapters.AvailableAnimationsListAdapter
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.properties.Delegates
 
 
 class MainActivity() : AppCompatActivity() {
@@ -54,6 +59,9 @@ class MainActivity() : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         connectionStatusIcon.setOnClickListener { setupBluetooth() }
+        val adapter = AvailableAnimationsListAdapter(AnimationItemProvider().getAllAnimationItems(), { startPlaying(it.animation) })
+        availableAnimationsList.layoutManager = LinearLayoutManager(this)
+        availableAnimationsList.adapter = adapter
     }
 
     override fun onStart() {
@@ -70,7 +78,6 @@ class MainActivity() : AppCompatActivity() {
 
 
     override fun onResume() {
-        Log.w(TAG, "onResume")
         super.onResume()
         connectedToCube = bt.connectedDeviceName != null;
         Log.w(TAG, "onResume: connected to cube: $connectedToCube")
@@ -157,6 +164,12 @@ class MainActivity() : AppCompatActivity() {
         Intent(this, StreamingService::class.java).also { startService(it) }
         if (mBound)
             mService.startPlaying()
+    }
+
+    private fun startPlaying(animation: Animation) {
+        Intent(this, StreamingService::class.java).also { startService(it) }
+        if (mBound)
+            mService.startPlaying(animation)
     }
 
     fun stop(view: View) {

@@ -10,7 +10,11 @@ class SimpleMultiplexAnimation : Animation() {
         state = 0
     }
 
-    override fun animate1ms() {
+    override fun animate2ms() {
+       runAlgo()
+    }
+
+    private fun runAlgo() {
         when (state) {
             0 -> {
                 byteStream[1] = 0xff.toByte()

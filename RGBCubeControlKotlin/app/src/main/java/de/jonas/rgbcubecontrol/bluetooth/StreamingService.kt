@@ -1,19 +1,20 @@
 package de.jonas.rgbcubecontrol.bluetooth
 
-import android.app.*
+import android.app.Notification
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
-import android.os.IBinder
-import android.util.Log
-import de.jonas.rgbcubecontrol.ui.App
-import android.support.v4.app.NotificationCompat
 import android.os.Binder
 import android.os.Build
-import android.support.v4.app.NotificationManagerCompat
+import android.os.IBinder
+import android.support.v4.app.NotificationCompat
 import android.support.v4.app.ServiceCompat
+import android.util.Log
 import de.jonas.rgbcubecontrol.R
+import de.jonas.rgbcubecontrol.domain.animations.Animation
 import de.jonas.rgbcubecontrol.domain.animations.SimpleMultiplexAnimation
-import de.jonas.rgbcubecontrol.domain.animations.TestLedAnimation
-import de.jonas.rgbcubecontrol.ui.MainActivity
+import de.jonas.rgbcubecontrol.ui.App
+import de.jonas.rgbcubecontrol.ui.activities.MainActivity
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -42,7 +43,7 @@ class StreamingService() : Service() {
 
     private fun startAsForegroundService(notification: Notification) {
         if (Build.VERSION.SDK_INT >= 26) {
-            Log.w(TAG, "startServiceOreoCondition")
+            Log.w(TAG, "startAsForegroundService")
             startForeground(NOTIFICATION_ID, notification)
         }
     }
@@ -60,9 +61,8 @@ class StreamingService() : Service() {
     }
 
 
-    fun startPlaying() {
+    fun startPlaying(animationToRun: Animation = SimpleMultiplexAnimation()) {
         Log.w(TAG, "startPlaying")
-        val animationToRun = TestLedAnimation()
 
         startAsForegroundService(buildNotification("Currently playing ${animationToRun.animationName}..."))
 
@@ -71,16 +71,13 @@ class StreamingService() : Service() {
         val end = ByteArray(1).also { it[0] = 'e'.toByte() }
 
         scheduler.scheduleAtFixedRate({
-            animationToRun.animate1ms()//
+            animationToRun.animate2ms()//
             App.bt.send(start, false)//
             App.bt.send(animationToRun.byteStream, false) //
             App.bt.send(end, false)
-        }, 0, 1, TimeUnit.MILLISECONDS)
+        }, 0, 2, TimeUnit.MILLISECONDS)
 
-//        scheduler.scheduleAtFixedRate({ animationToRun.animate2ms() }, 0, 2, TimeUnit.MILLISECONDS)
-//        scheduler.scheduleAtFixedRate({ animationToRun.animate5ms() }, 0, 5, TimeUnit.MILLISECONDS)
-//        scheduler.scheduleAtFixedRate({ animationToRun.animate10ms() }, 0, 10, TimeUnit.MILLISECONDS)
-//        scheduler.scheduleAtFixedRate({ animationToRun.animate25ms() }, 0, 25, TimeUnit.MILLISECONDS)
+
 //        scheduler.scheduleAtFixedRate({ animationToRun.animate50ms() }, 0, 50, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate100ms() }, 0, 100, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate200ms() }, 0, 200, TimeUnit.MILLISECONDS)

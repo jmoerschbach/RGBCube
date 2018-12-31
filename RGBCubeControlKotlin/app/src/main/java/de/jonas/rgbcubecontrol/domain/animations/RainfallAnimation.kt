@@ -19,7 +19,7 @@ class RainfallAnimation : Animation() {
         setAllLedsWhite()
     }
 
-    override fun animate1ms() {
+    override fun animate2ms() {
         if (multiplex) {
             clearAllLeds()
             setLedWhite(row, column)
