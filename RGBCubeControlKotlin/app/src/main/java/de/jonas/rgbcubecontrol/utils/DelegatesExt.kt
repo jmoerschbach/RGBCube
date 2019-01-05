@@ -1,4 +1,4 @@
-package jonas.de.weatherapp.ui.utils
+package de.jonas.rgbcubecontrol.utils
 
 import java.lang.IllegalStateException
 import kotlin.reflect.KProperty

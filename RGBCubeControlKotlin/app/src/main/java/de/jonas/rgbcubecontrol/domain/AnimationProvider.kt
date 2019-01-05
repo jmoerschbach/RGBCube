@@ -1,12 +1,11 @@
 package de.jonas.rgbcubecontrol.domain
 
-import de.jonas.rgbcubecontrol.domain.animations.AllLayersOnOffAnimation
-import de.jonas.rgbcubecontrol.domain.animations.Animation
-import de.jonas.rgbcubecontrol.domain.animations.SimpleMultiplexAnimation
-import de.jonas.rgbcubecontrol.domain.animations.TestLedAnimation
+import de.jonas.rgbcubecontrol.domain.animations.*
 import java.util.Arrays.asList
 
 class AnimationProvider {
 
-    fun getAvailableAnimations() : List<Animation> = asList(SimpleMultiplexAnimation(), AllLayersOnOffAnimation(), TestLedAnimation())
+    fun getAvailableAnimations(): List<Animation> {
+        return listOf(SimpleMultiplexAnimation(), AllLayersOnOffAnimation(), TestLedAnimation(), RainfallAnimation()).sortedBy { it.animationName }
+    }
 }

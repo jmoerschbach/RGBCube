@@ -1,7 +1,6 @@
 package de.jonas.rgbcubecontrol.domain.animations
 
 import de.jonas.rgbcubecontrol.domain.Constants
-
 class RainfallAnimation : Animation() {
 
     private var layerToLight = 7

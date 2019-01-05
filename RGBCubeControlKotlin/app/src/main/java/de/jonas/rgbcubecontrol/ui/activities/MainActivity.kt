@@ -18,7 +18,7 @@ import app.akexorcist.bluetotohspp.library.BluetoothState
 import app.akexorcist.bluetotohspp.library.DeviceList
 import de.jonas.rgbcubecontrol.R
 import de.jonas.rgbcubecontrol.bluetooth.StreamingService
-import de.jonas.rgbcubecontrol.domain.animations.Animation
+import de.jonas.rgbcubecontrol.ui.AnimationItem
 import de.jonas.rgbcubecontrol.ui.AnimationItemProvider
 import de.jonas.rgbcubecontrol.ui.App
 import de.jonas.rgbcubecontrol.ui.App.Companion.bt
@@ -59,7 +59,7 @@ class MainActivity() : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         connectionStatusIcon.setOnClickListener { setupBluetooth() }
-        val adapter = AvailableAnimationsListAdapter(AnimationItemProvider().getAllAnimationItems(), { startPlaying(it.animation) })
+        val adapter = AvailableAnimationsListAdapter(AnimationItemProvider().getAllAnimationItems(), { if (it.isPlaying) stopPlaying(it) else startPlaying(it) })
         availableAnimationsList.layoutManager = LinearLayoutManager(this)
         availableAnimationsList.adapter = adapter
     }
@@ -166,15 +166,24 @@ class MainActivity() : AppCompatActivity() {
             mService.startPlaying()
     }
 
-    private fun startPlaying(animation: Animation) {
+    private fun startPlaying(animation: AnimationItem) {
         Intent(this, StreamingService::class.java).also { startService(it) }
-        if (mBound)
-            mService.startPlaying(animation)
+        if (mBound) {
+            mService.startPlaying(animation.animation)
+            animation.isPlaying = true
+        }
     }
 
     fun stop(view: View) {
         Toast.makeText(this, "stop sending...", Toast.LENGTH_SHORT).show()
         stopPlaying()
+    }
+
+    private fun stopPlaying(animationItem: AnimationItem) {
+        if (mBound) {
+            mService.stopPlaying()
+            animationItem.isPlaying = false
+        }
     }
 
     private fun stopPlaying() {

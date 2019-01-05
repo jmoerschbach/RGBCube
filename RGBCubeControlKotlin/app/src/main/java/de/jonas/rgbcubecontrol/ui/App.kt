@@ -5,8 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import app.akexorcist.bluetotohspp.library.BluetoothSPP
-import jonas.de.weatherapp.ui.utils.DelegatesExt
-import jonas.de.weatherapp.ui.utils.NotNullSingleValueVar
+import de.jonas.rgbcubecontrol.utils.DelegatesExt
 
 class App : Application() {
 

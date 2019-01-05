@@ -63,10 +63,12 @@ class StreamingService() : Service() {
 
     fun startPlaying(animationToRun: Animation = SimpleMultiplexAnimation()) {
         Log.w(TAG, "startPlaying")
-
+        stopPlaying()
         startAsForegroundService(buildNotification("Currently playing ${animationToRun.animationName}..."))
+        play(animationToRun)
+    }
 
-
+    private fun play(animationToRun: Animation) {
         val start = ByteArray(1).also { it[0] = 'a'.toByte() }
         val end = ByteArray(1).also { it[0] = 'e'.toByte() }
 
@@ -78,7 +80,6 @@ class StreamingService() : Service() {
         }, 0, 2, TimeUnit.MILLISECONDS)
 
 
-//        scheduler.scheduleAtFixedRate({ animationToRun.animate50ms() }, 0, 50, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate100ms() }, 0, 100, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate200ms() }, 0, 200, TimeUnit.MILLISECONDS)
         scheduler.scheduleAtFixedRate({ animationToRun.animate500ms() }, 0, 500, TimeUnit.MILLISECONDS)

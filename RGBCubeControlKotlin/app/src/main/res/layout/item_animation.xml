@@ -6,15 +6,15 @@
     android:layout_marginLeft="@dimen/spacing_xlarge"
     android:layout_marginRight="@dimen/spacing_xlarge"
     android:layout_weight="1"
+    android:background="@drawable/selector_row"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="@dimen/spacing_xlarge">
 
-    <CheckBox
-        android:id="@+id/checkbox_meat"
+    <RadioButton
+        android:id="@+id/selectedRadioButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="onCheckboxClicked" />
+        android:layout_height="wrap_content" />
 
     <Space
         android:layout_width="@dimen/spacing_xlarge"
